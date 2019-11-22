@@ -19,13 +19,15 @@ namespace ImageProcess
 
         private void Q1_click(object sender, EventArgs e)
         {
+            
             Q1_BChannel.SizeMode = PictureBoxSizeMode.StretchImage;
             Q1_Gchannel.SizeMode = PictureBoxSizeMode.StretchImage;
             Q1_RChannel.SizeMode = PictureBoxSizeMode.StretchImage;
             Q1_Grayscale.SizeMode = PictureBoxSizeMode.StretchImage;
             Image i = Image.FromFile("ExampleImage//A_RGB.bmp");
             Q1_source.Image = i;
-            test.Text = i.RawFormat.ToString();
+            Bitmap image = new Bitmap(i);
+            test.Text = image.Size.ToString();
         }
 
         private void Q2_click(object sender, EventArgs e)
