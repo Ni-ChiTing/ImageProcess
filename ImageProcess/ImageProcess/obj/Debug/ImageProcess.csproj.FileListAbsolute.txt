@@ -7,3 +7,13 @@ F:\ImageProcess\ImageProcess\ImageProcess\obj\Debug\ImageProcess.Properties.Reso
 F:\ImageProcess\ImageProcess\ImageProcess\obj\Debug\ImageProcess.csproj.GenerateResource.Cache
 F:\ImageProcess\ImageProcess\ImageProcess\obj\Debug\ImageProcess.exe
 F:\ImageProcess\ImageProcess\ImageProcess\obj\Debug\ImageProcess.pdb
+D:\ImageProcess\ImageProcess\ImageProcess\obj\Debug\ImageProcess.csprojAssemblyReference.cache
+D:\ImageProcess\ImageProcess\ImageProcess\obj\Debug\ImageProcess.Form1.resources
+D:\ImageProcess\ImageProcess\ImageProcess\obj\Debug\ImageProcess.Properties.Resources.resources
+D:\ImageProcess\ImageProcess\ImageProcess\obj\Debug\ImageProcess.csproj.GenerateResource.cache
+D:\ImageProcess\ImageProcess\ImageProcess\obj\Debug\ImageProcess.csproj.CoreCompileInputs.cache
+D:\ImageProcess\ImageProcess\ImageProcess\obj\Debug\ImageProcess.exe
+D:\ImageProcess\ImageProcess\ImageProcess\obj\Debug\ImageProcess.pdb
+D:\ImageProcess\ImageProcess\ImageProcess\bin\Debug\ImageProcess.exe.config
+D:\ImageProcess\ImageProcess\ImageProcess\bin\Debug\ImageProcess.exe
+D:\ImageProcess\ImageProcess\ImageProcess\bin\Debug\ImageProcess.pdb
