@@ -15,6 +15,9 @@ namespace ImageProcess
             public Bitmap pic;
             public int step;
             public string label;
+            public bool UseTrackBar;
+            public bool UseHitogram;
+            public int[] historgramvalue;
         }
         // private Bitmap OrigPic = null;
         private string Filename = null;
@@ -22,6 +25,15 @@ namespace ImageProcess
         public List<Picture> Stack = new List<Picture>();
         private bool UseResultPic = false;
         private string PreStepLabel = "";
+        private int threshold = 128;
+        public int GetThreshold()
+        {
+            return threshold;
+        }
+        public void SetThreshold(int v)
+        {
+            threshold = v;
+        }
         public void SetPreStepLabel(string s)
         {
             PreStepLabel = s;
@@ -49,12 +61,15 @@ namespace ImageProcess
         {
             Filename = name;
         }
-        private void AddStack(string l,Bitmap b)
+        private void AddStack(string l,Bitmap b,bool track,bool hist,int [] value)
         {
             Picture temp = new Picture();
             temp.step = total_step;
             temp.pic = b;
             temp.label = l;
+            temp.UseTrackBar = track;
+            temp.UseHitogram = hist;
+            temp.historgramvalue = value;
             Stack.Add(temp);
         }
         public int GetNowStep()
@@ -136,11 +151,11 @@ namespace ImageProcess
                     Graylevel.SetPixel(x, y, Gray);
                 }
             }
-            AddStack("Source", image);
-            AddStack("R_Channel", R);
-            AddStack("G_Channel", G);
-            AddStack("B_Channel", B);
-            AddStack("GrayLevel", Graylevel);
+            AddStack("Source", image,false,false,null);
+            AddStack("R_Channel", R,false,false,null);
+            AddStack("G_Channel", G,false,false,null);
+            AddStack("B_Channel", B,false,false,null);
+            AddStack("GrayLevel", Graylevel,false,false,null);
             ++total_step;
             //Bitmap[] arr = { R, G, B, Graylevel };
             //return arr;
@@ -193,7 +208,7 @@ namespace ImageProcess
                 image = new Bitmap(i);
             }
             Bitmap image_extend = ExtendBitmap(image);
-            AddStack("Source", image);
+            AddStack("Source", image,false,false,null);
             Mean = new Bitmap(image.Width, image.Height);
             Median = new Bitmap(image.Width, image.Height);
             Color[] C = new Color[9];
@@ -227,8 +242,145 @@ namespace ImageProcess
 
                 }
             }
-            AddStack("Mean", Mean);
-            AddStack("Median", Median);
+            AddStack("Mean", Mean,false,false,null);
+            AddStack("Median", Median,false,false,null);
+            ++total_step;
+        }
+        public void HistorgramEqualization()
+        {
+            Image i = null;
+            int[] value = new int[256];
+            int[] cdf = new int[256];
+            int[] value2 = new int[256];
+            for (int k = 0; k < value.Length; ++k)
+            {
+                value[k] = 0;
+                cdf[k] = 0;
+                value2[k] = 0;
+            }
+            if (Filename == null)
+            {
+                i = Image.FromFile(".\\ExampleImage\\C_dark2.bmp");
+            }
+            else
+            {
+                i = Image.FromFile(Filename);
+            }
+
+            Bitmap image = null;
+            if (UseResultPic)
+            {
+                image = FindBitMapByLabal(GetNowStepPicture());
+            }
+            else
+            {
+                image = new Bitmap(i);
+            }
+            if (image == null)
+            {
+                image = new Bitmap(i);
+            }
+            Bitmap Graylevel = new Bitmap(image.Width, image.Height);
+            Bitmap Equa = new Bitmap(image.Width, image.Height);
+            for (int x = 0; x < image.Width; ++x)
+            {
+                for (int y = 0; y < image.Height; ++y)
+                {
+                    Color C = image.GetPixel(x, y);
+                    //Debug.Print(C.ToString())
+                    int grayScale = (int)((C.R * 0.3) + (C.G * 0.59) + (C.B * 0.11));
+                    ++value[grayScale]; 
+                    Color Gray = Color.FromArgb(C.A, grayScale, grayScale, grayScale);
+                    Graylevel.SetPixel(x, y, Gray);
+                }
+            }
+            AddStack("Source", Graylevel, false, true, value);
+            
+            cdf[0] = value[0];
+            int min;
+            if (cdf[0] > 0)
+            {
+                min = cdf[0];
+            }
+            else
+            {
+                min = int.MaxValue;
+            }
+            
+           for (int k = 1; k < cdf.Length; ++k)
+            {
+                cdf[k] = cdf[k - 1] + value[k];
+                if (cdf[k] > 0 && cdf[k] < min)
+                {
+                    min = cdf[k];
+                }
+                
+            }
+            Debug.Print(min.ToString());
+            double size = image.Width * image.Height - min;
+            for (int x = 0; x < Graylevel.Width; ++x)
+            {
+                for (int y = 0; y < Graylevel.Height; ++y)
+                {
+                    Color C = Graylevel.GetPixel(x, y);
+                    int v =(int)Math.Round(((cdf[C.R] - min) / size)*255);
+//S Debug.Print(v.ToString());
+                    ++value2[v];
+                    Color Gray = Color.FromArgb(C.A, v, v, v);
+                    Equa.SetPixel(x, y, Gray);
+                }
+            }
+            
+            AddStack("Result", Equa, false, true, value2);
+            ++total_step;
+        }
+        public void ThresholdCal()
+        {
+            Image i = null;
+            if (Filename == null)
+            {
+                i = Image.FromFile(".\\ExampleImage\\A_RGB.bmp");
+            }
+            else
+            {
+                i = Image.FromFile(Filename);
+            }
+
+            Bitmap image = null;
+            if (UseResultPic)
+            {
+                image = FindBitMapByLabal(GetNowStepPicture());
+            }
+            else
+            {
+                image = new Bitmap(i);
+            }
+            if (image == null)
+            {
+                image = new Bitmap(i);
+            }
+            Bitmap Graylevel = new Bitmap(image.Width, image.Height);
+            Bitmap Graylevel_t = new Bitmap(image.Width, image.Height);
+            Debug.Print("threshold = " +threshold.ToString());
+            for (int x = 0; x < image.Width; ++x)
+            {
+                for (int y = 0; y < image.Height; ++y)
+                {
+                    Color C = image.GetPixel(x, y);
+                    
+                    int grayScale = (int)((C.R * 0.3) + (C.G * 0.59) + (C.B * 0.11));
+                    Color Gray = Color.FromArgb(C.A, grayScale, grayScale, grayScale);
+                    Color t;
+                    if (grayScale < threshold)
+                        t = Color.FromArgb(C.A, 0, 0, 0);
+                    else
+                        t = Color.FromArgb(C.A, 255, 255, 255);
+                    Graylevel.SetPixel(x, y, Gray);
+                    Graylevel_t.SetPixel(x, y, t);
+                }
+            }
+            AddStack("Source", Graylevel, true, false, null);
+            AddStack("Result", Graylevel_t, true, false, null);
             ++total_step;
         }
         public void Undo()

@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Diagnostics;
+using System.Windows.Forms.DataVisualization.Charting;
 namespace ImageProcess
 {
 
@@ -19,7 +20,8 @@ namespace ImageProcess
         private List<PictureBox> pictureboxs = new List<PictureBox>();
         private List<TextBox> textboxes = new List<TextBox>();
         private List<TrackBar> trackbars = new List<TrackBar>();
-        private int threshold = 128;
+        private int opt = 0;
+        //private int threshold = 128;
         public Form1()
         {
             InitializeComponent();
@@ -27,7 +29,6 @@ namespace ImageProcess
             pictureboxs.Clear();
             textboxes.Clear();
             trackbars.Clear();
-
         }
         private void CleanResult()
         {
@@ -70,7 +71,7 @@ namespace ImageProcess
             Q1_Grayscale.Image = imagefunction.GetGrayLevel();
             */
         }
-        private void CreatePicbox(int num,string[] label,Bitmap[] img,Boolean changevalue)
+        private void CreatePicbox(int num,string[] label,Bitmap[] img,bool changevalue,bool historgram,int [] value1,int [] value2)
         {
             Debug.Print(ResultGroup.Location.ToString());
             int width = ResultGroup.Width;
@@ -123,16 +124,47 @@ namespace ImageProcess
                 tb.Location = pt;
                 tb.MouseUp += TrackBar_change;
                 tb.KeyUp += TrackBar_change;
-                tb.Value = threshold;
+                tb.Value = imagefunction.GetThreshold();
                 tb.Width = ((width - saperate_w * 3) / 5) * 4;
                 this.ResultGroup.Controls.Add(tb);
                 trackbars.Add(tb);
                 TextBox txtb = new TextBox();
-                txtb.Text = threshold.ToString();
+                txtb.Text = imagefunction.GetThreshold().ToString();
                 txtb.KeyDown += TextKeyDown;
                 txtb.Location = new Point(pt.X + tb.Width + saperate_w, pt.Y + (int)(saperate_h*0.3));
                 this.ResultGroup.Controls.Add(txtb);
                 textboxes.Add(txtb);
+            }
+            if (historgram)
+            {
+                int[] X_label = Enumerable.Range(0, 256).ToArray(); //0~255
+                
+                Chart chart1 = new Chart();
+                Chart chart2 = new Chart();
+                chart1.ChartAreas.Add("ChartArea");
+                chart1.Series.Add("Series");
+                Title title = new Title();
+                title.Text = "Historgram of gray level";
+                chart1.Titles.Add(title);
+                chart1.ChartAreas["ChartArea"].BackColor = Color.Transparent;
+                chart1.BackColor = Color.Transparent;
+                chart1.Size = new Size(274, 183);
+                chart1.Location = new Point(9, 189); //289 189
+                chart1.Series["Series"].Points.DataBindXY(X_label, value1);
+                chart1.Series["Series"].Color = Color.Green;
+                this.ResultGroup.Controls.Add(chart1);
+                chart2.ChartAreas.Add("ChartArea");
+                chart2.Series.Add("Series");
+                title = new Title();
+                title.Text = "Historgram of gray level";
+                chart2.Titles.Add(title);
+                chart2.ChartAreas["ChartArea"].BackColor = Color.Transparent;
+                chart2.BackColor = Color.Transparent;
+                chart2.Size = new Size(274, 183);
+                chart2.Location = new Point(289, 189); //289 189
+                chart2.Series["Series"].Points.DataBindXY(X_label, value2);
+                chart2.Series["Series"].Color = Color.DarkSlateBlue;
+                this.ResultGroup.Controls.Add(chart2);
             }
         }
 
@@ -143,12 +175,31 @@ namespace ImageProcess
                 int value = int.Parse(textboxes[0].Text);
                 if (value <=255 && value >= 0)
                 {
-                    threshold = value;
+                    imagefunction.SetThreshold(value);
                     trackbars[0].Value = value;
+                    CleanResult();
+                    if (opt == 4)
+                    {
+                        //checkBox1.Checked = false;
+                        //imagefunction.SetResultPic(checkBox1.Checked);
+                        imagefunction.SetPreStepLabel("Source");
+                        imagefunction.ThresholdCal();
+                    }
+                        
+                    var list = imagefunction.GetNowStepPicture();
+                    Debug.Print(list.Count.ToString());
+                    string[] labels = new string[list.Count];
+                    Bitmap[] bitmaps = new Bitmap[list.Count];
+                    for (int i = 0; i < list.Count; ++i)
+                    {
+                        labels[i] = list[i].label;
+                        bitmaps[i] = list[i].pic;
+                    }
+                    CreatePicbox(list.Count, labels, bitmaps, true, false, null, null);
                 }
                 else
                 {
-                    textboxes[0].Text = threshold.ToString();
+                    textboxes[0].Text = imagefunction.GetThreshold().ToString();
                 }
             }
             Debug.Print(e.KeyValue.ToString());
@@ -156,10 +207,29 @@ namespace ImageProcess
 
         private void TrackBar_change(object sender, EventArgs e)
         {
-            if (trackbars[0].Value != threshold) {
+            if (trackbars[0].Value != imagefunction.GetThreshold()) {
                 Debug.Print(trackbars[0].Value.ToString());
-                threshold = trackbars[0].Value;
-                textboxes[0].Text = threshold.ToString();
+                imagefunction.SetThreshold(trackbars[0].Value);
+                textboxes[0].Text = imagefunction.GetThreshold().ToString();
+                CleanResult();
+                if (opt == 4)
+                {
+                    //checkBox1.Checked = false;
+                    //imagefunction.SetResultPic(checkBox1.Checked);
+                    imagefunction.SetPreStepLabel("Source");
+                    imagefunction.ThresholdCal();
+                }
+                    
+                var list = imagefunction.GetNowStepPicture();
+                Debug.Print(list.Count.ToString());
+                string[] labels = new string[list.Count];
+                Bitmap[] bitmaps = new Bitmap[list.Count];
+                for (int i = 0; i < list.Count; ++i)
+                {
+                    labels[i] = list[i].label;
+                    bitmaps[i] = list[i].pic;
+                }
+                CreatePicbox(list.Count, labels, bitmaps, true, false, null, null);
             }
             else
             {
@@ -228,6 +298,7 @@ namespace ImageProcess
             switch (func)
             {
                 case 1:
+                    opt = 1;
                     imagefunction.GetRGBandGraylevelPic();
                     var list = imagefunction.GetNowStepPicture();
                     Debug.Print(list.Count.ToString());
@@ -238,9 +309,10 @@ namespace ImageProcess
                         labels[i] = list[i].label;
                         bitmaps[i] = list[i].pic;
                     }
-                    CreatePicbox(list.Count, labels, bitmaps, false);
+                    CreatePicbox(list.Count, labels, bitmaps, false,false,null,null);
                     break;
                 case 2:
+                    opt = 2;
                     imagefunction.SmoothFilter();
                     list = imagefunction.GetNowStepPicture();
                     Debug.Print(list.Count.ToString());
@@ -251,11 +323,35 @@ namespace ImageProcess
                         labels[i] = list[i].label;
                         bitmaps[i] = list[i].pic;
                     }
-                    CreatePicbox(list.Count, labels, bitmaps, false);
+                    CreatePicbox(list.Count, labels, bitmaps, false,false,null,null);
                     break;
                 case 3:
+                    opt = 3;
+                    imagefunction.HistorgramEqualization();
+                    list = imagefunction.GetNowStepPicture();
+                    Debug.Print(list.Count.ToString());
+                    labels = new string[list.Count];
+                    bitmaps = new Bitmap[list.Count];
+                    for (int i = 0; i < list.Count; ++i)
+                    {
+                        labels[i] = list[i].label;
+                        bitmaps[i] = list[i].pic;
+                    }
+                    CreatePicbox(list.Count, labels, bitmaps, false, true,list[0].historgramvalue, list[1].historgramvalue);
                     break;
                 case 4:
+                    opt = 4;
+                    imagefunction.ThresholdCal();
+                    list = imagefunction.GetNowStepPicture();
+                    Debug.Print(list.Count.ToString());
+                    labels = new string[list.Count];
+                    bitmaps = new Bitmap[list.Count];
+                    for (int i = 0; i < list.Count; ++i)
+                    {
+                        labels[i] = list[i].label;
+                        bitmaps[i] = list[i].pic;
+                    }
+                    CreatePicbox(list.Count, labels, bitmaps, true, false, null, null);
                     break;
                 case 5:
                     break;
@@ -268,10 +364,11 @@ namespace ImageProcess
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
-            if (imagefunction.GetNowStep() >= 0)
+            if (imagefunction.GetNowStep() >= 0 )
             {
                 imagefunction.SetResultPic(checkBox1.Checked);
                 Debug.Print(checkBox1.Checked.ToString());
+
             }
             else
             {
@@ -295,12 +392,39 @@ namespace ImageProcess
                     labels[i] = list[i].label;
                     bitmaps[i] = list[i].pic;
                 }
-                CreatePicbox(list.Count, labels, bitmaps, false);
+                if (list.Count > 0)
+                {
+                    if (list[0].UseHitogram)
+                    {
+                        CreatePicbox(list.Count, labels, bitmaps, list[0].UseTrackBar, list[0].UseHitogram, list[0].historgramvalue,list[1].historgramvalue);
+                    }
+                    else
+                    {
+                        CreatePicbox(list.Count, labels, bitmaps, list[0].UseTrackBar, list[0].UseHitogram, null, null);
+
+                    }
+                    
+                }
+                
                 if(imagefunction.GetNowStep() == 0)
+                {
                     checkBox1.Checked = false;
+                }
+                    
                
             }
             
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            CleanResult();
+            Image i = null;
+            i = Image.FromFile(".\\ExampleImage\\B_noisy.bmp");
+            Bitmap image = new Bitmap(i);
+            Bitmap[] bitmaps = { image, image };
+            string[] s = { "Aaaaa", "BBBBBB" };
+            CreatePicbox(2,s , bitmaps, false, true, Enumerable.Range(0, 256).ToArray(), Enumerable.Range(0, 256).ToArray());
         }
     }
 }
