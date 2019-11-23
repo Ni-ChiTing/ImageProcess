@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 namespace ImageProcess
 {
+
     public partial class Form1 : Form
     {
         ImageFunction imagefunction = new ImageFunction();
@@ -50,6 +51,7 @@ namespace ImageProcess
             pictureboxs.Clear();
             textboxes.Clear();
             trackbars.Clear();
+            ResultGroup.Controls.Clear();
         } 
         private void Q1_click(object sender, EventArgs e)
         {
@@ -68,7 +70,7 @@ namespace ImageProcess
             Q1_Grayscale.Image = imagefunction.GetGrayLevel();
             */
         }
-        private void CreatePicbox(int num,string[] label,Boolean changevalue)
+        private void CreatePicbox(int num,string[] label,Bitmap[] img,Boolean changevalue)
         {
             Debug.Print(ResultGroup.Location.ToString());
             int width = ResultGroup.Width;
@@ -79,7 +81,7 @@ namespace ImageProcess
             int image_h = 120;
             int saperate_w = ((width - (image_w * 3)) / 4);
             int saperate_h = ((height - (image_h * 2)) / 8);
-            Image img = Image.FromFile("ExampleImage//A_RGB.bmp");
+            //Image img = Image.FromFile("ExampleImage//A_RGB.bmp");
             for (int i = 0; i < num; ++i )
             {
                 int j = i / 3;
@@ -88,7 +90,7 @@ namespace ImageProcess
                 p.Size = new Size(image_w, image_h);
                 p.SizeMode = PictureBoxSizeMode.StretchImage;
                 p.Location = pt;
-                p.Image = img;
+                p.Image = img[i];
                 this.ResultGroup.Controls.Add(p);
                 if (i < label.Length)
                 {
@@ -144,6 +146,10 @@ namespace ImageProcess
                     threshold = value;
                     trackbars[0].Value = value;
                 }
+                else
+                {
+                    textboxes[0].Text = threshold.ToString();
+                }
             }
             Debug.Print(e.KeyValue.ToString());
         }
@@ -162,8 +168,6 @@ namespace ImageProcess
         }
         private void Filebtn_Click(object sender, EventArgs e)
         {
-            string[] a = { "assssssss", "b","c" };
-            CreatePicbox(3,a,true);
             OpenFileDialog dialog = new OpenFileDialog();
             dialog.Title = "Select file";
             dialog.RestoreDirectory = false;
@@ -172,8 +176,131 @@ namespace ImageProcess
             dialog.Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png , *.bmp) | *.jpg; *.jpeg; *.jpe; *.jfif; *.png ;  *.bmp";
             if (dialog.ShowDialog() == DialogResult.OK)
             {
-                MessageBox.Show(dialog.FileName);
+                Filepath.Text = dialog.FileName;
+                imagefunction.SetFileName(dialog.FileName);
             }
+        }
+
+        private void OK_click(object sender, EventArgs e)
+        {
+  
+            int func = 0;
+            foreach(Control c in groupBox8.Controls)
+            {
+                if (c is RadioButton)
+                {
+                    RadioButton rb = c as RadioButton;
+                    if (rb.Checked)
+                    {
+                        func = int.Parse(rb.Tag.ToString());
+                    }
+                }
+               
+            }
+            Debug.Print(func.ToString());
+            
+            if (checkBox1.Checked)
+            {
+                var list = imagefunction.GetNowStepPicture();
+                if (list.Count > 1)
+                {
+                    ChooseResult chr = new ChooseResult();
+                    string[] s = new string[list.Count - 1];
+                    int j = 0;
+                    for ( int i = 0; i < list.Count; ++i)
+                    {
+                        if (list[i].label != "Source")
+                        {
+                            s[j] = list[i].label;
+                            ++j;
+                        }
+                    }
+                    chr.CreateRadioButton(s);
+                    chr.ShowDialog(this);
+                    if (chr.DialogResult == System.Windows.Forms.DialogResult.OK)
+                    {
+                        Debug.Print(chr.result);
+                        imagefunction.SetPreStepLabel(chr.result);
+                    }
+                }
+            }
+            CleanResult();
+            switch (func)
+            {
+                case 1:
+                    imagefunction.GetRGBandGraylevelPic();
+                    var list = imagefunction.GetNowStepPicture();
+                    Debug.Print(list.Count.ToString());
+                    string[] labels = new string[list.Count];
+                    Bitmap[] bitmaps = new Bitmap[list.Count];
+                    for (int i = 0; i < list.Count; ++i)
+                    {
+                        labels[i] = list[i].label;
+                        bitmaps[i] = list[i].pic;
+                    }
+                    CreatePicbox(list.Count, labels, bitmaps, false);
+                    break;
+                case 2:
+                    imagefunction.SmoothFilter();
+                    list = imagefunction.GetNowStepPicture();
+                    Debug.Print(list.Count.ToString());
+                    labels = new string[list.Count];
+                    bitmaps = new Bitmap[list.Count];
+                    for (int i = 0; i < list.Count; ++i)
+                    {
+                        labels[i] = list[i].label;
+                        bitmaps[i] = list[i].pic;
+                    }
+                    CreatePicbox(list.Count, labels, bitmaps, false);
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    break;
+                case 5:
+                    break;
+                case 6:
+                    break;
+                case 7:
+                    break;
+            }
+        }
+
+        private void checkBox1_CheckedChanged(object sender, EventArgs e)
+        {
+            if (imagefunction.GetNowStep() >= 0)
+            {
+                imagefunction.SetResultPic(checkBox1.Checked);
+                Debug.Print(checkBox1.Checked.ToString());
+            }
+            else
+            {
+                checkBox1.Checked = false;
+            }
+            
+        }
+
+        private void button9_Click(object sender, EventArgs e)
+        {
+            if (imagefunction.GetNowStep() >= 0)
+            {
+                imagefunction.Undo();
+                CleanResult();
+                var list = imagefunction.GetNowStepPicture();
+                Debug.Print(list.Count.ToString());
+                string[] labels = new string[list.Count];
+                Bitmap[] bitmaps = new Bitmap[list.Count];
+                for (int i = 0; i < list.Count; ++i)
+                {
+                    labels[i] = list[i].label;
+                    bitmaps[i] = list[i].pic;
+                }
+                CreatePicbox(list.Count, labels, bitmaps, false);
+                if(imagefunction.GetNowStep() == 0)
+                    checkBox1.Checked = false;
+               
+            }
+            
         }
     }
 }

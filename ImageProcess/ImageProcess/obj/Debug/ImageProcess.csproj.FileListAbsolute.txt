@@ -17,3 +17,4 @@ D:\ImageProcess\ImageProcess\ImageProcess\obj\Debug\ImageProcess.pdb
 D:\ImageProcess\ImageProcess\ImageProcess\bin\Debug\ImageProcess.exe.config
 D:\ImageProcess\ImageProcess\ImageProcess\bin\Debug\ImageProcess.exe
 D:\ImageProcess\ImageProcess\ImageProcess\bin\Debug\ImageProcess.pdb
+D:\ImageProcess\ImageProcess\ImageProcess\obj\Debug\ImageProcess.ChooseResult.resources
