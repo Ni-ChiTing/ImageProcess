@@ -354,6 +354,18 @@ namespace ImageProcess
                     CreatePicbox(list.Count, labels, bitmaps, true, false, null, null);
                     break;
                 case 5:
+                    opt = 5;
+                    imagefunction.SobelFilter();
+                    list = imagefunction.GetNowStepPicture();
+                    Debug.Print(list.Count.ToString());
+                    labels = new string[list.Count];
+                    bitmaps = new Bitmap[list.Count];
+                    for (int i = 0; i < list.Count; ++i)
+                    {
+                        labels[i] = list[i].label;
+                        bitmaps[i] = list[i].pic;
+                    }
+                    CreatePicbox(list.Count, labels, bitmaps, false, false, null, null);
                     break;
                 case 6:
                     break;

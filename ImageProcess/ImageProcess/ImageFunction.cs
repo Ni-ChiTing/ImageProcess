@@ -26,6 +26,7 @@ namespace ImageProcess
         private bool UseResultPic = false;
         private string PreStepLabel = "";
         private int threshold = 128;
+        private Bitmap Q5_pic = null;
         public int GetThreshold()
         {
             return threshold;
@@ -100,6 +101,28 @@ namespace ImageProcess
             }
             int[] result = { A, R, G, B };
             return result;
+        }
+        public void Normalize(List<int> data,int size,Bitmap pic)
+        {
+            double max = data.Max();
+            double min = data.Min();
+            int x = 0;
+            int y = 0;
+            Debug.Print("Max = " + max.ToString());
+            Debug.Print("Min = " + min.ToString());
+            for (int i = 0;i < data.Count; ++i)
+            {
+                x = i / pic.Height;
+                y = i % pic.Height;
+                if (data[i] > size)
+                {
+                    data[i] = size;
+
+                }
+                //data[i] = (int)(((data[i] - min) / (max - min)) * size);
+                pic.SetPixel(x, y, Color.FromArgb(pic.GetPixel(x, y).A, data[i], data[i], data[i]));
+            }
+            
         }
         public void GetRGBandGraylevelPic()
         {
@@ -382,6 +405,79 @@ namespace ImageProcess
             AddStack("Source", Graylevel, true, false, null);
             AddStack("Result", Graylevel_t, true, false, null);
             ++total_step;
+        }
+        public void SobelFilter()
+        {
+            Image i = null;
+            if (Filename == null)
+            {
+                i = Image.FromFile(".\\ExampleImage\\B_noisy.bmp");
+            }
+            else
+            {
+                i = Image.FromFile(Filename);
+            }
+            Bitmap image = null;
+            if (UseResultPic)
+            {
+                image = FindBitMapByLabal(GetNowStepPicture());
+            }
+            else
+            {
+                image = new Bitmap(i);
+            }
+            if (image == null)
+            {
+                image = new Bitmap(i);
+            }
+           // Bitmap Graylevel = new Bitmap(image.Width, image.Height);
+            Bitmap Graylevel_extend = ExtendBitmap(image);
+            Bitmap X_Sobel = new Bitmap(image.Width, image.Height);
+            Bitmap Y_Sobel = new Bitmap(image.Width, image.Height);
+            Bitmap Combined = new Bitmap(image.Width, image.Height);
+
+            int[] sobelX = { -1, 0, 1, -2, 0, 2, -1, 0, 1 };
+            int[] sobelY = { 1, 2, 1, 0, 0, 0, -1, -2, -1 };
+            int[] data = new int[9];
+            List<int> datas = new List<int>();
+            List<int> datas2 = new List<int>();
+            List<int> datas3 = new List<int>();
+            for (int x = 1; x <Graylevel_extend.Width - 1; ++x)
+            {
+                for (int y = 1; y < Graylevel_extend.Height -1 ; ++y)
+                {
+                    data[0] = Graylevel_extend.GetPixel(x - 1, y - 1).R;
+                    data[1] = Graylevel_extend.GetPixel(x , y - 1).R;
+                    data[2] = Graylevel_extend.GetPixel(x + 1, y - 1).R;
+                    data[3] = Graylevel_extend.GetPixel(x - 1, y ).R;
+                    data[4] = Graylevel_extend.GetPixel(x, y ).R;
+                    data[5] = Graylevel_extend.GetPixel(x + 1, y).R;
+                    data[6] = Graylevel_extend.GetPixel(x - 1, y + 1).R;
+                    data[7] = Graylevel_extend.GetPixel(x, y + 1).R;
+                    data[8] = Graylevel_extend.GetPixel(x + 1, y + 1).R;
+                    int gx = FilterProcess(sobelX,data);
+                    int gy = FilterProcess(sobelY, data);
+                    datas.Add(Math.Abs(gx));
+                    datas2.Add(Math.Abs(gy));
+                    datas3.Add(Math.Abs(gx) + Math.Abs(gy));
+                    Y_Sobel.SetPixel(x - 1, y - 1, Color.FromArgb(image.GetPixel(x - 1, y - 1).A, 0, 0, 0));
+                    X_Sobel.SetPixel(x - 1, y - 1, Color.FromArgb(image.GetPixel(x -1,y-1).A,0,0,0));
+                    Combined.SetPixel(x - 1, y - 1, Color.FromArgb(image.GetPixel(x - 1, y - 1).A, 0, 0, 0));
+                }
+            }
+            Normalize(datas, 255,X_Sobel);
+            Normalize(datas2, 255, Y_Sobel);
+            Normalize(datas3, 255, Combined);
+            AddStack("Source", image, false, false, null);
+            AddStack("Verticle", X_Sobel, false, false, null);
+            AddStack("Horizontal", Y_Sobel, false, false, null);
+            AddStack("Combined", Combined, false, false, null);
+            Q5_pic = Combined;
+            ++total_step;
+        }
+        public void OverlapImage()
+        {
+
         }
         public void Undo()
         {
