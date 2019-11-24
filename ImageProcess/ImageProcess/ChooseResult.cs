@@ -21,6 +21,17 @@ namespace ImageProcess
             radiobuttons.Clear();
             button1.DialogResult = System.Windows.Forms.DialogResult.OK;
         }
+        public void CreatTextLable()
+        {
+            int saperate_w = 30;
+            int saperate_h = 30;
+            Label t = new Label();
+            t.Location = new Point(saperate_w, saperate_h);
+            t.Text = "Use Q5 Combined result to Do";
+            t.Width = groupBox1.Width - saperate_w * 2;
+            groupBox1.Controls.Add(t);
+
+        }
         public void CreateRadioButton(string[] s)
         {
             int width = groupBox1.Width;

@@ -36,9 +36,9 @@ namespace ImageProcess
         {
             threshold = v;
         }
-        public void CleanQ5Pic()
+        public bool IfQ5PicNotExist()
         {
-            Q5_pic = null;
+            return Q5_pic == null;
         }
         public void SetPreStepLabel(string s)
         {
@@ -533,8 +533,8 @@ namespace ImageProcess
             if (UseResultPic)
             {
                 image = FindBitMapByLabal(GetNowStepPicture());
-                Q5_source = null;
-                Q5_pic = null;
+                //Q5_source = null;
+                //Q5_pic = null;
             }
             else
             {

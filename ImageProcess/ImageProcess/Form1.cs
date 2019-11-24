@@ -275,32 +275,42 @@ namespace ImageProcess
                
             }
             Debug.Print(func.ToString());
-            
-            if (checkBox1.Checked)
+            if (func == 6 && !imagefunction.IfQ5PicNotExist())
             {
-                var list = imagefunction.GetNowStepPicture();
-                if (list.Count > 1)
+                ChooseResult chr = new ChooseResult();
+                chr.CreatTextLable();
+                chr.ShowDialog(this);
+            }
+            else
+            {
+                if (checkBox1.Checked)
                 {
-                    ChooseResult chr = new ChooseResult();
-                    string[] s = new string[list.Count - 1];
-                    int j = 0;
-                    for ( int i = 0; i < list.Count; ++i)
+                    var list = imagefunction.GetNowStepPicture();
+
+                    if (list.Count > 1)
                     {
-                        if (list[i].label != "Source")
+                        ChooseResult chr = new ChooseResult();
+                        string[] s = new string[list.Count - 1];
+                        int j = 0;
+                        for (int i = 0; i < list.Count; ++i)
                         {
-                            s[j] = list[i].label;
-                            ++j;
+                            if (list[i].label != "Source")
+                            {
+                                s[j] = list[i].label;
+                                ++j;
+                            }
                         }
-                    }
-                    chr.CreateRadioButton(s);
-                    chr.ShowDialog(this);
-                    if (chr.DialogResult == System.Windows.Forms.DialogResult.OK)
-                    {
-                        Debug.Print(chr.result);
-                        imagefunction.SetPreStepLabel(chr.result);
+                        chr.CreateRadioButton(s);
+                        chr.ShowDialog(this);
+                        if (chr.DialogResult == System.Windows.Forms.DialogResult.OK)
+                        {
+                            Debug.Print(chr.result);
+                            imagefunction.SetPreStepLabel(chr.result);
+                        }
                     }
                 }
             }
+            
             CleanResult();
             switch (func)
             {
@@ -449,6 +459,42 @@ namespace ImageProcess
 
         private void button2_Click(object sender, EventArgs e)
         {
+            while (imagefunction.GetNowStep() >= 0)
+            {
+                imagefunction.Undo();
+                CleanResult();
+                var list = imagefunction.GetNowStepPicture();
+                Debug.Print(list.Count.ToString());
+                string[] labels = new string[list.Count];
+                Bitmap[] bitmaps = new Bitmap[list.Count];
+                for (int i = 0; i < list.Count; ++i)
+                {
+                    labels[i] = list[i].label;
+                    bitmaps[i] = list[i].pic;
+                }
+                if (list.Count > 0)
+                {
+                    if (list[0].UseHitogram)
+                    {
+                        CreatePicbox(list.Count, labels, bitmaps, list[0].UseTrackBar, list[0].UseHitogram, list[0].historgramvalue, list[1].historgramvalue);
+                    }
+                    else
+                    {
+                        CreatePicbox(list.Count, labels, bitmaps, list[0].UseTrackBar, list[0].UseHitogram, null, null);
+
+                    }
+
+                }
+
+                if (imagefunction.GetNowStep() == 0)
+                {
+                    checkBox1.Checked = false;
+                }
+
+
+            }
+
+            /*
             CleanResult();
             Image i = null;
             i = Image.FromFile(".\\ExampleImage\\B_noisy.bmp");
@@ -456,6 +502,7 @@ namespace ImageProcess
             Bitmap[] bitmaps = { image, image };
             string[] s = { "Aaaaa", "BBBBBB" };
             CreatePicbox(2,s , bitmaps, false, true, Enumerable.Range(0, 256).ToArray(), Enumerable.Range(0, 256).ToArray());
+            */
         }
     }
 }
