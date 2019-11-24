@@ -185,7 +185,11 @@ namespace ImageProcess
                         imagefunction.SetPreStepLabel("Source");
                         imagefunction.ThresholdCal();
                     }
-                        
+                    else if (opt == 6)
+                    {
+                        imagefunction.RenewTheThresholdAndOverlap();
+                    }
+
                     var list = imagefunction.GetNowStepPicture();
                     Debug.Print(list.Count.ToString());
                     string[] labels = new string[list.Count];
@@ -218,6 +222,9 @@ namespace ImageProcess
                     //imagefunction.SetResultPic(checkBox1.Checked);
                     imagefunction.SetPreStepLabel("Source");
                     imagefunction.ThresholdCal();
+                }else if (opt == 6)
+                {
+                    imagefunction.RenewTheThresholdAndOverlap();
                 }
                     
                 var list = imagefunction.GetNowStepPicture();
@@ -368,6 +375,18 @@ namespace ImageProcess
                     CreatePicbox(list.Count, labels, bitmaps, false, false, null, null);
                     break;
                 case 6:
+                    opt = 6;
+                    imagefunction.OverlapImage();
+                    list = imagefunction.GetNowStepPicture();
+                    Debug.Print(list.Count.ToString());
+                    labels = new string[list.Count];
+                    bitmaps = new Bitmap[list.Count];
+                    for (int i = 0; i < list.Count; ++i)
+                    {
+                        labels[i] = list[i].label;
+                        bitmaps[i] = list[i].pic;
+                    }
+                    CreatePicbox(list.Count, labels, bitmaps, true, false, null, null);
                     break;
                 case 7:
                     break;

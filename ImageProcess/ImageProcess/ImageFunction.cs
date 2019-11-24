@@ -27,6 +27,7 @@ namespace ImageProcess
         private string PreStepLabel = "";
         private int threshold = 128;
         private Bitmap Q5_pic = null;
+        private Bitmap Q5_source = null;
         public int GetThreshold()
         {
             return threshold;
@@ -34,6 +35,10 @@ namespace ImageProcess
         public void SetThreshold(int v)
         {
             threshold = v;
+        }
+        public void CleanQ5Pic()
+        {
+            Q5_pic = null;
         }
         public void SetPreStepLabel(string s)
         {
@@ -406,6 +411,43 @@ namespace ImageProcess
             AddStack("Result", Graylevel_t, true, false, null);
             ++total_step;
         }
+        public void RenewTheThresholdAndOverlap()
+        {
+
+            Bitmap Combined = Q5_pic;
+            Bitmap Graylevel_t = new Bitmap(Q5_pic.Width, Q5_pic.Height);
+            Bitmap Overlap = new Bitmap(Q5_pic.Width, Q5_pic.Height);
+            Debug.Print("threshold = " + threshold.ToString());
+            for (int x = 0; x < Combined.Width; ++x)
+            {
+                for (int y = 0; y < Combined.Height; ++y)
+                {
+                    Color C = Combined.GetPixel(x, y);
+
+
+                    Color t;
+                    Color r;
+                    if (C.B < threshold)
+                    {
+                        t = Color.FromArgb(C.A, 0, 0, 0);
+                        r = Q5_source.GetPixel(x, y);
+                    }
+                    else
+                    {
+                        t = Color.FromArgb(C.A, 255, 255, 255);
+                        r = Color.FromArgb(Q5_source.GetPixel(x, y).A, 0, 255, 0);
+                    }
+
+                    Graylevel_t.SetPixel(x, y, t);
+                    Overlap.SetPixel(x, y, r);
+                }
+            }
+            AddStack("Source", Q5_source, true, false, null);
+            AddStack("Combined", Combined, true, false, null);
+            AddStack("Threshold", Graylevel_t, true, false, null);
+            AddStack("Overlap", Overlap, true, false, null);
+            ++total_step;
+        }
         public void SobelFilter()
         {
             Image i = null;
@@ -430,7 +472,8 @@ namespace ImageProcess
             {
                 image = new Bitmap(i);
             }
-           // Bitmap Graylevel = new Bitmap(image.Width, image.Height);
+            // Bitmap Graylevel = new Bitmap(image.Width, image.Height);
+            Q5_source = image;
             Bitmap Graylevel_extend = ExtendBitmap(image);
             Bitmap X_Sobel = new Bitmap(image.Width, image.Height);
             Bitmap Y_Sobel = new Bitmap(image.Width, image.Height);
@@ -477,7 +520,98 @@ namespace ImageProcess
         }
         public void OverlapImage()
         {
+            Image i = null;
+            if (Filename == null)
+            {
+                i = Image.FromFile(".\\ExampleImage\\B_noisy.bmp");
+            }
+            else
+            {
+                i = Image.FromFile(Filename);
+            }
+            Bitmap image = null;
+            if (UseResultPic)
+            {
+                image = FindBitMapByLabal(GetNowStepPicture());
+                Q5_source = null;
+                Q5_pic = null;
+            }
+            else
+            {
+                image = new Bitmap(i);
+            }
+            if (image == null)
+            {
+                image = new Bitmap(i);
+            }
+            Bitmap Combined;
+            if (Q5_pic == null)
+            {
+                Combined = new Bitmap(image.Width, image.Height);
 
+                int[] sobelX = { -1, 0, 1, -2, 0, 2, -1, 0, 1 };
+                int[] sobelY = { 1, 2, 1, 0, 0, 0, -1, -2, -1 };
+                int[] data = new int[9];
+                List<int> datas3 = new List<int>();
+                Bitmap Graylevel_extend = ExtendBitmap(image);
+                for (int x = 1; x < Graylevel_extend.Width - 1; ++x)
+                {
+                    for (int y = 1; y < Graylevel_extend.Height - 1; ++y)
+                    {
+                        data[0] = Graylevel_extend.GetPixel(x - 1, y - 1).R;
+                        data[1] = Graylevel_extend.GetPixel(x, y - 1).R;
+                        data[2] = Graylevel_extend.GetPixel(x + 1, y - 1).R;
+                        data[3] = Graylevel_extend.GetPixel(x - 1, y).R;
+                        data[4] = Graylevel_extend.GetPixel(x, y).R;
+                        data[5] = Graylevel_extend.GetPixel(x + 1, y).R;
+                        data[6] = Graylevel_extend.GetPixel(x - 1, y + 1).R;
+                        data[7] = Graylevel_extend.GetPixel(x, y + 1).R;
+                        data[8] = Graylevel_extend.GetPixel(x + 1, y + 1).R;
+                        int gx = FilterProcess(sobelX, data);
+                        int gy = FilterProcess(sobelY, data);
+                        datas3.Add(Math.Abs(gx) + Math.Abs(gy));
+                        Combined.SetPixel(x - 1, y - 1, Color.FromArgb(image.GetPixel(x - 1, y - 1).A, 0, 0, 0));
+                    }
+                }
+                Normalize(datas3, 255, Combined);
+                Q5_pic = Combined;
+                Q5_source = image;
+            }
+            else
+            {
+                Combined = Q5_pic;
+            }
+            Bitmap Graylevel_t = new Bitmap(image.Width, image.Height);
+            Bitmap Overlap = new Bitmap(image.Width, image.Height);
+            Debug.Print("threshold = " + threshold.ToString());
+            for (int x = 0; x < Combined.Width; ++x)
+            {
+                for (int y = 0; y < Combined.Height; ++y)
+                {
+                    Color C = Combined.GetPixel(x, y);
+
+                    Color t;
+                    Color r;
+                    if (C.B < threshold)
+                    {
+                        t = Color.FromArgb(C.A, 0, 0, 0);
+                        r = Q5_source.GetPixel(x, y);
+                    }
+                    else
+                    {
+                        t = Color.FromArgb(C.A, 255, 255, 255);
+                        r = Color.FromArgb(Q5_source.GetPixel(x, y).A, 0, 255, 0);
+                    }
+                        
+                    Graylevel_t.SetPixel(x, y, t);
+                    Overlap.SetPixel(x, y, r);
+                }
+            }
+            AddStack("Source", Q5_source, true, false, null);
+            AddStack("Combined", Combined, true, false, null);
+            AddStack("Threshold",Graylevel_t, true, false, null);
+            AddStack("Overlap", Overlap, true, false, null);
+            ++total_step;
         }
         public void Undo()
         {
