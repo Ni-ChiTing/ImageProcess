@@ -81,7 +81,6 @@ namespace ImageProcess
             tb.Location = new Point(X + 2*saperate_w + itemwidth, Y);
             tb.Width = itemwidth;
             tb.Text = "45";
-            tb.TextChanged += textchange;
             tb.KeyPress +=  HandleKeyPress;
             textboxes.Add(tb);
             groupBox1.Controls.Add(t);
@@ -126,23 +125,7 @@ namespace ImageProcess
             if (!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar))
                 e.Handled = true;
         }
-        private void textchange(object sender, EventArgs e)
-        {
-            try {
-                if (int.Parse(textboxes[0].Text) < 0)
-                {
-                    textboxes[0].Text = "0";
-                }
-                else if (int.Parse(textboxes[0].Text) > 360)
-                {
-                    textboxes[0].Text = "359";
-                }
-            }catch(Exception ex)
-            {
-                textboxes[0].Text = "45";
-            }
-            
-        }
+
 
         private void button1_Click(object sender, EventArgs e)
         {

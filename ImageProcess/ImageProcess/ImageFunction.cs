@@ -128,8 +128,9 @@ namespace ImageProcess
             double min = data.Min();
             int x = 0;
             int y = 0;
-            Debug.Print("Max = " + max.ToString());
-            Debug.Print("Min = " + min.ToString());
+            //Debug.Print("Max = " + max.ToString());
+            //Debug.Print("Min = " + min.ToString());
+           // Debug.Print("Before Width = " + pic.Width.ToString() + "Height = " + pic.Height.ToString());
             for (int i = 0;i < data.Count; ++i)
             {
                 x = i / pic.Height;
@@ -142,8 +143,10 @@ namespace ImageProcess
                 //data[i] = (int)(((data[i] - min) / (max - min)) * size);
                 pic.SetPixel(x, y, Color.FromArgb(pic.GetPixel(x, y).A, data[i], data[i], data[i]));
             }
+            //Debug.Print("Width = " + pic.Width.ToString() + "Height = " + pic.Height.ToString());
             
         }
+       
         public void GetRGBandGraylevelPic()
         {
             Bitmap G = null;
@@ -500,6 +503,9 @@ namespace ImageProcess
             List<int> datas = new List<int>();
             List<int> datas2 = new List<int>();
             List<int> datas3 = new List<int>();
+            datas.Clear();
+            datas2.Clear();
+            datas3.Clear();
             for (int x = 1; x <Graylevel_extend.Width - 1; ++x)
             {
                 for (int y = 1; y < Graylevel_extend.Height -1 ; ++y)
@@ -595,11 +601,11 @@ namespace ImageProcess
             }
             else
             {
+                Debug.Print("extsit");
                 Combined = Q5_pic;
             }
-            Bitmap Graylevel_t = new Bitmap(image.Width, image.Height);
-            Bitmap Overlap = new Bitmap(image.Width, image.Height);
-            Debug.Print("threshold = " + threshold.ToString());
+            Bitmap Graylevel_t = new Bitmap(Combined.Width, Combined.Height);
+            Bitmap Overlap = new Bitmap(Combined.Width, Combined.Height);
             for (int x = 0; x < Combined.Width; ++x)
             {
                 for (int y = 0; y < Combined.Height; ++y)
@@ -629,7 +635,7 @@ namespace ImageProcess
             AddStack("Overlap", Overlap, true, false, null);
             ++total_step;
         }
-       public void RotationAndScale()
+        public void RotationAndScale()
         {
             Image i = null;
             if (Filename == null)
@@ -655,7 +661,47 @@ namespace ImageProcess
                 image = new Bitmap(i);
             }
             AddStack("Souce", image, false, false, null);
-            
+            float sin = (float)Math.Abs(Math.Sin(rotateangle * Math.PI / 180.0));
+            float cos = (float)Math.Abs(Math.Cos(rotateangle * Math.PI / 180.0));
+            int rotateImgWidth = (int)(sin * image.Height + cos * image.Width);
+            int rotateImgHeight = (int)(sin * image.Width + cos * image.Height);
+            int centerX = image.Width / 2;
+            int centerY = image.Height / 2;
+            Bitmap rotateimg = new Bitmap(rotateImgWidth, rotateImgHeight);
+            Bitmap scaleimg = new Bitmap((int)(image.Width * scaleWidth), (int)(image.Height * scaleHeight));
+            Debug.Print("Width = " + rotateImgWidth.ToString() + "Height = " + rotateImgHeight.ToString());
+            double paddY = -(rotateImgHeight/2) * Math.Cos(rotateangle * Math.PI / 180.0) + (rotateImgWidth/2) * Math.Sin(rotateangle * Math.PI / 180.0) + centerY;
+            double paddX = -(rotateImgHeight/2) * Math.Cos(rotateangle * Math.PI / 180.0) - (rotateImgWidth/2) * Math.Sin(rotateangle * Math.PI / 180.0) + centerX;
+            for (int x = 0; x < rotateImgWidth; ++x)
+            {
+                for (int y = 0; y < rotateImgHeight; ++y)
+                {
+                    double newX = Math.Cos(rotateangle * Math.PI / 180.0) * x + Math.Sin(rotateangle * Math.PI / 180.0) * y +paddX;
+                    double newY = -Math.Sin(rotateangle * Math.PI / 180.0) * x + Math.Cos(rotateangle * Math.PI / 180.0) * y +paddY;
+
+                    if (newX < image.Width && newY < image.Height && newX >= 0 && newY >= 0){
+                        rotateimg.SetPixel(x, y,image.GetPixel((int)newX, (int)newY));
+                    }
+                    else
+                    {
+                        rotateimg.SetPixel(x, y, Color.FromArgb(255, 0, 0, 0));
+                    }
+
+                }
+            }
+            for (int x = 0; x < scaleimg.Width; ++x)
+            {
+                for (int y = 0; y < scaleimg.Height; ++y)
+                {
+                    double newX = x/scaleWidth;
+                    double newY = y/scaleHeight;
+                    scaleimg.SetPixel(x, y, image.GetPixel((int)newX, (int)newY));
+
+
+                }
+            }
+            AddStack("Rotate", rotateimg, false, false, null);
+            AddStack("Scale", scaleimg, false, false, null);
             ++total_step;
         }
 

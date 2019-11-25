@@ -89,7 +89,16 @@ namespace ImageProcess
                 Point pt = new Point(x + saperate_w*((i%3)+1) + (i % 3) * image_w, y + saperate_h* (j*2 + 2) + j * image_h);
                 PictureBox p = new PictureBox();
                 p.Size = new Size(image_w, image_h);
-                p.SizeMode = PictureBoxSizeMode.StretchImage;
+                if (opt == 7 && i == 2)
+                {
+                    p.SizeMode = PictureBoxSizeMode.Zoom;
+
+
+                }
+                else {
+                    p.SizeMode = PictureBoxSizeMode.StretchImage;
+                }
+                    
                 p.Location = pt;
                 p.Image = img[i];
                 this.ResultGroup.Controls.Add(p);
@@ -99,7 +108,7 @@ namespace ImageProcess
                     l.Text = label[i];
                     Point ptt = new Point(pt.X + image_w / 2 - (int)l.CreateGraphics().MeasureString(l.Text, l.Font).Width/ 2, pt.Y+ image_h + (saperate_h - (int)l.CreateGraphics().MeasureString(l.Text, l.Font).Height) /2 );
                     l.Location = ptt;
-                    Debug.Print(l.Location.ToString() + " width " + l.CreateGraphics().MeasureString(l.Text,l.Font).ToString());
+                    //Debug.Print(l.Location.ToString() + " width " + l.CreateGraphics().MeasureString(l.Text,l.Font).ToString());
                     this.ResultGroup.Controls.Add(l);
                 }
                 else
@@ -109,7 +118,7 @@ namespace ImageProcess
                     Point ptt = new Point(pt.X + image_w / 2 - (int)l.CreateGraphics().MeasureString(l.Text, l.Font).Width / 2, pt.Y + image_h + (saperate_h - (int)l.CreateGraphics().MeasureString(l.Text, l.Font).Height) / 2);
 
                     l.Location = ptt;
-                    Debug.Print(l.Location.ToString() + " width " + l.Width.ToString());
+                    //Debug.Print(l.Location.ToString() + " width " + l.Width.ToString());
                     this.ResultGroup.Controls.Add(l);
                 }
             }
