@@ -28,6 +28,21 @@ namespace ImageProcess
         private int threshold = 128;
         private Bitmap Q5_pic = null;
         private Bitmap Q5_source = null;
+        private float scaleWidth = 1;
+        private float scaleHeight = 1;
+        private int rotateangle = 45;
+        public void SetScaleWidth(float w)
+        {
+            scaleWidth = w;
+        }
+        public void SetScaleHeight(float h)
+        {
+            scaleHeight = h;
+        }
+        public void SetRotateAngle(int a)
+        {
+            rotateangle = a;
+        }
         public int GetThreshold()
         {
             return threshold;
@@ -453,7 +468,7 @@ namespace ImageProcess
             Image i = null;
             if (Filename == null)
             {
-                i = Image.FromFile(".\\ExampleImage\\B_noisy.bmp");
+                i = Image.FromFile(".\\ExampleImage\\E_I-edge.bmp");
             }
             else
             {
@@ -489,15 +504,16 @@ namespace ImageProcess
             {
                 for (int y = 1; y < Graylevel_extend.Height -1 ; ++y)
                 {
-                    data[0] = Graylevel_extend.GetPixel(x - 1, y - 1).R;
-                    data[1] = Graylevel_extend.GetPixel(x , y - 1).R;
-                    data[2] = Graylevel_extend.GetPixel(x + 1, y - 1).R;
-                    data[3] = Graylevel_extend.GetPixel(x - 1, y ).R;
-                    data[4] = Graylevel_extend.GetPixel(x, y ).R;
-                    data[5] = Graylevel_extend.GetPixel(x + 1, y).R;
-                    data[6] = Graylevel_extend.GetPixel(x - 1, y + 1).R;
-                    data[7] = Graylevel_extend.GetPixel(x, y + 1).R;
-                    data[8] = Graylevel_extend.GetPixel(x + 1, y + 1).R;
+                    //int grayScale = (int)((C.R * 0.3) + (C.G * 0.59) + (C.B * 0.11));
+                    data[0] = (int)(Graylevel_extend.GetPixel(x - 1, y - 1).R*0.3 + Graylevel_extend.GetPixel(x - 1, y - 1).G * 0.59+ Graylevel_extend.GetPixel(x - 1, y - 1).B * 0.11);
+                    data[1] = (int)(Graylevel_extend.GetPixel(x , y - 1).R * 0.3 + Graylevel_extend.GetPixel(x , y - 1).G * 0.59 + Graylevel_extend.GetPixel(x , y - 1).B * 0.11);
+                    data[2] = (int)(Graylevel_extend.GetPixel(x + 1, y - 1).R * 0.3 + Graylevel_extend.GetPixel(x + 1, y - 1).G * 0.59 + Graylevel_extend.GetPixel(x + 1, y - 1).B * 0.11);
+                    data[3] = (int)(Graylevel_extend.GetPixel(x - 1, y).R * 0.3 + Graylevel_extend.GetPixel(x - 1, y).G * 0.59 + Graylevel_extend.GetPixel(x - 1, y).B * 0.11);
+                    data[4] = (int)(Graylevel_extend.GetPixel(x , y ).R * 0.3 + Graylevel_extend.GetPixel(x , y ).G * 0.59 + Graylevel_extend.GetPixel(x , y ).B * 0.11);
+                    data[5] = (int)(Graylevel_extend.GetPixel(x + 1, y ).R * 0.3 + Graylevel_extend.GetPixel(x + 1, y ).G * 0.59 + Graylevel_extend.GetPixel(x + 1, y).B * 0.11);
+                    data[6] = (int)(Graylevel_extend.GetPixel(x - 1, y + 1).R * 0.3 + Graylevel_extend.GetPixel(x - 1, y+1).G * 0.59 + Graylevel_extend.GetPixel(x - 1, y + 1).B * 0.11);
+                    data[7] = (int)(Graylevel_extend.GetPixel(x, y + 1).R * 0.3 + Graylevel_extend.GetPixel(x, y + 1).G * 0.59 + Graylevel_extend.GetPixel(x, y + 1).B * 0.11);
+                    data[8] = (int)(Graylevel_extend.GetPixel(x + 1, y + 1).R * 0.3 + Graylevel_extend.GetPixel(x + 1, y + 1).G * 0.59 + Graylevel_extend.GetPixel(x + 1, y +1).B * 0.11);
                     int gx = FilterProcess(sobelX,data);
                     int gy = FilterProcess(sobelY, data);
                     datas.Add(Math.Abs(gx));
@@ -613,6 +629,36 @@ namespace ImageProcess
             AddStack("Overlap", Overlap, true, false, null);
             ++total_step;
         }
+       public void RotationAndScale()
+        {
+            Image i = null;
+            if (Filename == null)
+            {
+                i = Image.FromFile(".\\ExampleImage\\A_RGB.bmp");
+            }
+            else
+            {
+                i = Image.FromFile(Filename);
+            }
+
+            Bitmap image = null;
+            if (UseResultPic)
+            {
+                image = FindBitMapByLabal(GetNowStepPicture());
+            }
+            else
+            {
+                image = new Bitmap(i);
+            }
+            if (image == null)
+            {
+                image = new Bitmap(i);
+            }
+            AddStack("Souce", image, false, false, null);
+            
+            ++total_step;
+        }
+
         public void Undo()
         {
             if (total_step > 0)

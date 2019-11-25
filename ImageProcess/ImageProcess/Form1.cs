@@ -281,6 +281,54 @@ namespace ImageProcess
                 chr.CreatTextLable();
                 chr.ShowDialog(this);
             }
+            else if (func == 7)
+            {
+                ChooseResult chr = new ChooseResult();
+                if (checkBox1.Checked)
+                {
+                    var list = imagefunction.GetNowStepPicture();
+
+                    if (list.Count > 1)
+                    {
+                        string[] s = new string[list.Count - 1];
+                        int j = 0;
+                        for (int i = 0; i < list.Count; ++i)
+                        {
+                            if (list[i].label != "Source")
+                            {
+                                s[j] = list[i].label;
+                                ++j;
+                            }
+                        }
+                        chr.CreateRadioButton(s);
+                    }
+                }
+                chr.CreateTextBoxAndLabel();
+                chr.ShowDialog(this);
+                if (checkBox1.Checked)
+                {
+                    if (chr.DialogResult == System.Windows.Forms.DialogResult.OK)
+                    {
+                        Debug.Print(chr.result);
+                        imagefunction.SetPreStepLabel(chr.result);
+                        imagefunction.SetRotateAngle(int.Parse(chr.angle));
+                        imagefunction.SetScaleHeight(float.Parse(chr.hs));
+                        imagefunction.SetScaleWidth(float.Parse(chr.ws));
+                        Debug.Print(chr.result + " " + chr.angle + " " + chr.ws+  " " + chr.hs );
+                    }
+                }
+                else
+                {
+                    if (chr.DialogResult == System.Windows.Forms.DialogResult.OK)
+                    {
+                        imagefunction.SetRotateAngle(int.Parse(chr.angle));
+                        imagefunction.SetScaleHeight(float.Parse(chr.hs));
+                        imagefunction.SetScaleWidth(float.Parse(chr.ws));
+                        Debug.Print( chr.angle + " " + chr.ws + " " + chr.hs);
+                    }
+                }
+
+            }
             else
             {
                 if (checkBox1.Checked)
@@ -399,6 +447,18 @@ namespace ImageProcess
                     CreatePicbox(list.Count, labels, bitmaps, true, false, null, null);
                     break;
                 case 7:
+                    opt = 7;
+                    imagefunction.RotationAndScale();
+                    list = imagefunction.GetNowStepPicture();
+                    Debug.Print(list.Count.ToString());
+                    labels = new string[list.Count];
+                    bitmaps = new Bitmap[list.Count];
+                    for (int i = 0; i < list.Count; ++i)
+                    {
+                        labels[i] = list[i].label;
+                        bitmaps[i] = list[i].pic;
+                    }
+                    CreatePicbox(list.Count, labels, bitmaps, false, false, null, null);
                     break;
             }
         }
