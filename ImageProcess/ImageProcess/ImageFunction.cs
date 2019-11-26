@@ -426,7 +426,7 @@ namespace ImageProcess
                 }
             }
             AddStack("Source", Graylevel, true, false, null);
-            AddStack("Result", Graylevel_t, true, false, null);
+            AddStack("Threshold Result", Graylevel_t, true, false, null);
             ++total_step;
         }
         public void RenewTheThresholdAndOverlap()

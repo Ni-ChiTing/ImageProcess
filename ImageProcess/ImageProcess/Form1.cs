@@ -500,6 +500,18 @@ namespace ImageProcess
                 for (int i = 0; i < list.Count; ++i)
                 {
                     labels[i] = list[i].label;
+                    if (labels[i] == "Overlap")
+                    {
+                        opt = 6;
+                    }
+                    else if (labels[i] == "Threshold Result")
+                    {
+                        opt = 4;
+                    }
+                    else
+                    {
+                        opt = 0;
+                    }
                     bitmaps[i] = list[i].pic;
                 }
                 if (list.Count > 0)
