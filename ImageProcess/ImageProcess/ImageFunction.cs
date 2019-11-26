@@ -534,7 +534,7 @@ namespace ImageProcess
             Normalize(datas2, 255, Y_Sobel);
             Normalize(datas3, 255, Combined);
             AddStack("Source", image, false, false, null);
-            AddStack("Verticle", X_Sobel, false, false, null);
+            AddStack("Vertical", X_Sobel, false, false, null);
             AddStack("Horizontal", Y_Sobel, false, false, null);
             AddStack("Combined", Combined, false, false, null);
             Q5_pic = Combined;
