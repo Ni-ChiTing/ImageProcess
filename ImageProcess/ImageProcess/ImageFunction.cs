@@ -663,21 +663,21 @@ namespace ImageProcess
             AddStack("Souce", image, false, false, null);
             float sin = (float)Math.Abs(Math.Sin(rotateangle * Math.PI / 180.0));
             float cos = (float)Math.Abs(Math.Cos(rotateangle * Math.PI / 180.0));
-            int rotateImgWidth = (int)(sin * image.Height + cos * image.Width);
-            int rotateImgHeight = (int)(sin * image.Width + cos * image.Height);
-            int centerX = image.Width / 2;
-            int centerY = image.Height / 2;
-            Bitmap rotateimg = new Bitmap(rotateImgWidth, rotateImgHeight);
+            double rotateImgWidth = (sin * image.Height + cos * image.Width);
+            double rotateImgHeight = (sin * image.Width + cos * image.Height);
+            double centerX = (image.Width-1) / 2;
+            double centerY = (image.Height-1) / 2;
+            Bitmap rotateimg = new Bitmap((int)rotateImgWidth, (int)rotateImgHeight);
             Bitmap scaleimg = new Bitmap((int)(image.Width * scaleWidth), (int)(image.Height * scaleHeight));
             Debug.Print("Width = " + rotateImgWidth.ToString() + "Height = " + rotateImgHeight.ToString());
-            double paddY = -(rotateImgHeight/2) * Math.Cos(rotateangle * Math.PI / 180.0) + (rotateImgWidth/2) * Math.Sin(rotateangle * Math.PI / 180.0) + centerY;
-            double paddX = -(rotateImgHeight/2) * Math.Cos(rotateangle * Math.PI / 180.0) - (rotateImgWidth/2) * Math.Sin(rotateangle * Math.PI / 180.0) + centerX;
-            for (int x = 0; x < rotateImgWidth; ++x)
+            double paddY = -((rotateImgHeight-1)/2) * Math.Cos(rotateangle * Math.PI / 180.0) + ((rotateImgWidth-1)/2) * Math.Sin(rotateangle * Math.PI / 180.0) + centerY;
+            double paddX = -((rotateImgHeight-1)/2) * Math.Sin(rotateangle * Math.PI / 180.0) - ((rotateImgWidth-1)/2) * Math.Cos(rotateangle * Math.PI / 180.0) + centerX;
+            for (int x = 0; x < rotateimg.Width; ++x)
             {
-                for (int y = 0; y < rotateImgHeight; ++y)
+                for (int y = 0; y < rotateimg.Height; ++y)
                 {
-                    double newX = Math.Cos(rotateangle * Math.PI / 180.0) * x + Math.Sin(rotateangle * Math.PI / 180.0) * y +paddX;
-                    double newY = -Math.Sin(rotateangle * Math.PI / 180.0) * x + Math.Cos(rotateangle * Math.PI / 180.0) * y +paddY;
+                    double newX = Math.Cos(rotateangle * Math.PI / 180.0) * x + Math.Sin(rotateangle * Math.PI / 180.0) * y +paddX+0.5;
+                    double newY = -Math.Sin(rotateangle * Math.PI / 180.0) * x + Math.Cos(rotateangle * Math.PI / 180.0) * y +paddY+0.5;
 
                     if (newX < image.Width && newY < image.Height && newX >= 0 && newY >= 0){
                         rotateimg.SetPixel(x, y,image.GetPixel((int)newX, (int)newY));

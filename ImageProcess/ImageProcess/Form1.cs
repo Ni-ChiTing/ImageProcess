@@ -153,7 +153,7 @@ namespace ImageProcess
                 chart1.ChartAreas.Add("ChartArea");
                 chart1.Series.Add("Series");
                 Title title = new Title();
-                title.Text = "Historgram of gray level";
+                title.Text = "Histogram of gray level";
                 chart1.Titles.Add(title);
                 chart1.ChartAreas["ChartArea"].BackColor = Color.Transparent;
                 chart1.BackColor = Color.Transparent;
@@ -165,7 +165,7 @@ namespace ImageProcess
                 chart2.ChartAreas.Add("ChartArea");
                 chart2.Series.Add("Series");
                 title = new Title();
-                title.Text = "Historgram of gray level";
+                title.Text = "Histogram of gray level";
                 chart2.Titles.Add(title);
                 chart2.ChartAreas["ChartArea"].BackColor = Color.Transparent;
                 chart2.BackColor = Color.Transparent;
